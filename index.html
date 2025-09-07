@@ -380,7 +380,8 @@ confirmNo.addEventListener('click', ()=>{
 });
 
 // Xác nhận xuất PDF
-confirmYes.addEventListener('click', ()=> {
+// Xác nhận xuất PDF
+confirmYes.addEventListener('click', ()=>{
   confirmDialog.classList.remove('show');
 
   const element = document.getElementById('exportContent');
@@ -388,25 +389,32 @@ confirmYes.addEventListener('click', ()=> {
   addBtns.forEach(btn => btn.style.display = 'none');
 
   html2pdf().set({
-    margin: 10,
-    filename: 'BanCamKetTinhYeu.pdf',
-    image: { type: 'jpeg', quality: 1 },
-    html2canvas: { scale: 3, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: [ 'css', 'legacy'] }
-  }).from(element).outputPdf('blob').then(function(blob){
+  margin: 10,
+  filename: 'BanCamKetTinhYeu.pdf',
+  image: { type: 'jpeg', quality: 1 },
+  html2canvas: { scale: 3, useCORS: true },
+  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+  pagebreak: { mode: [ 'css', 'legacy'] }
+}).from(element).outputPdf('blob').then(function(blob){
+  
+  // Tạo link download
+  const url = URL.createObjectURL(blob);
+  
+  if(/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream){
+    // iOS: mở PDF trực tiếp
+    window.open(url, '_blank');
+  } else {
+    // Android & Desktop: tải về
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'BanCamKetTinhYeu.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 
-    // Trên mobile iOS/Android
-    const reader = new FileReader();
-    reader.onload = function(e){
-      const url = e.target.result; // base64
-      window.open(url, '_blank'); // mở trực tiếp
-    };
-    reader.readAsDataURL(blob);
-
-    // Quay lại hiển thị nút + nếu cần
-    addBtns.forEach(btn => btn.style.display = '');
-  });
+  addBtns.forEach(btn => btn.style.display = '');
+});
 });
   </script>
 </body>
